@@ -26,10 +26,10 @@
  ## Verwendung:
     o Weather_widget in denselben Ordner packen als wie die restlichen zu Verfügung stehenden Download Ordner
     o anschließend die Datei Wetter_widget.py starten
-    o Um den Ort für die Vorhersage zu ändern, muss ausschließlich der Klasse Wetter_widget eine andere Destination
-      übergeben werden.
-    o Als beispiel können Sie einfach die main Funktion starten, welche eine mögliche implementierung des Wetter Widget
-      simuliert.
+    o Um den Ort für die Vorhersage zu ändern, muss ausschließlich der Klasse Wetter_widget eine andere 
+      Destination übergeben werden.
+    o Als beispiel können Sie einfach die main Funktion starten, welche eine mögliche implementierung des 
+      Wetter Widget simuliert.
     
     
     
