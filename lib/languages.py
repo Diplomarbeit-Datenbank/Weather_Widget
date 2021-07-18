@@ -18,7 +18,9 @@ __version__ = '1.02'
 __licence__ = 'Common Licence'
 __debugging__ = 'Christof Haidegger'
 
-import sys
+
+from inspect import currentframe
+from termcolor import colored
 
 try:
     from lib.basics.encode import Encode_umlauts
@@ -26,10 +28,23 @@ except ModuleNotFoundError:
     raise ModuleNotFoundError('Module encode is not in directory: .../lib/basics/encode.py')
 
 
+def get_line_number():
+    """
+
+        :return: the current line number
+        """
+    cf = currentframe()
+    return cf.f_back.f_lineno
+
+
 class Language:
     """
         Class to refactor the words just call it with the file path
     """
+
+    # to count the warnings
+    warning_counter = 0
+
     def __init__(self, file_path, language='german'):
         """
 
@@ -70,9 +85,10 @@ class Language:
 
         # when index is None the language is not found in the file
         if language_line_index is None:
-            print('[Warning] selected language not found in file: ' + self.file_path +
-                  ' english will be returned (Remember to write no Capital Letters #german != #German)',
-                  file=sys.stderr)
+            print(colored('[Language: Warning: ' + str(type(self).warning_counter) + ' in Line: ' + str(get_line_number())
+                  + '] selected language not found in file: ' + self.file_path +
+                  ' english will be returned (Remember to write no Capital Letters #german != #German)', 'yellow'))
+            type(self).warning_counter += 1
             return None
 
         else:
@@ -108,11 +124,17 @@ class Language:
                 return self.refactor_data[string]
             # KeyError raises, when the given string is not found in the language dict
             except KeyError:
-                print('[Warning] word: "' + string + '" is not found in language data | return string', file=sys.stderr)
+                print(colored('[Language: Warning: ' + str(type(self).warning_counter) + ' in Line: ' +
+                              str(get_line_number())
+                      + '] word: "' + string + '" is not found in language data | return string', 'yellow'))
+                type(self).warning_counter += 1
                 return string
 
         else:
-            print('[Warning] No Language Data | return string', file=sys.stderr)
+            print(colored('[Language: Warning: ' + str(type(self).warning_counter) + ' in Line: ' +
+                          str(get_line_number()) +
+                  '] No Language Data | return string', 'yellow'))
+            type(self).warning_counter += 1
             return string
 
 
