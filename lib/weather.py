@@ -35,14 +35,28 @@ __version__ = '1.2'
 __licence__ = 'Common Licence'
 __debugging__ = 'Christof Haidegger'
 
+from inspect import currentframe
+from termcolor import colored
 import pyowm
 import sys
+
+
+def get_line_number():
+    """
+
+        :return: the current line number
+        """
+    cf = currentframe()
+    return cf.f_back.f_lineno
 
 
 class Weather:
     """
         Class to get the actually weather data of the given destination
     """
+    # to count warnings:
+    warning_counter = 0
+
     def __init__(self, destination):
         """
 
@@ -65,12 +79,14 @@ class Weather:
         try:
             try:
                 weather = mgr.weather_at_place(self.destination)
-            except pyowm.commons.exceptions.NotFoundError:
-                print('[Error] Destination is not found', file=sys.stderr)
+            except (pyowm.commons.exceptions.NotFoundError, pyowm.commons.exceptions.TimeoutError,
+                    pyowm.commons.exceptions.APIRequestError) as e:
+                print('[Weather: Error: ' + str(type(self).warning_counter) + ' in Line: ' + str(get_line_number())
+                      + '] ', e, '-> return None', file=sys.stderr)
                 return None
             self.weather_data = weather.weather.to_dict()
         except pyowm.commons.exceptions.InvalidSSLCertificateError:
-            print('[Error] No internet connection!', file=sys.stderr)
+            print('[Weather: Error in Line: ' + str(get_line_number()) + '] No internet connection!', file=sys.stderr)
             return None
 
     def calc_kelvin_2_celsius(self, temp, comma=2):
@@ -83,7 +99,10 @@ class Weather:
         :raise:       [Warning] when there is actually no weather data collected
         """
         if self.weather_data is None:
-            print('[Warning] No weather data is collected! Do not only try random values!', file=sys.stderr)
+            print(colored('[Weather: Warning: ' + str(type(self).warning_counter)
+                  + ' in Line: ' + str(get_line_number())
+                  + '] No weather data is collected! Do not only try random values!', 'yellow'))
+            type(self).warning_counter += 1
         return round(temp - 273.15, comma)
 
     def calc_kelvin_2_fahrenheit(self, temp, comma=2):
@@ -96,7 +115,9 @@ class Weather:
         :raise:       [Warning] when there is actually no weather data collected
         """
         if self.weather_data is None:
-            print('[Warning] No weather data is collected! Do not only try random values!', file=sys.stderr)
+            print(colored('[Weather: Warning: ' + str(type(self).warning_counter) + ' in Line: ' + str(get_line_number()) +
+                  '] No weather data is collected! Do not only try random values!', 'yellow'))
+            type(self).warning_counter += 1
         return round((temp - 273.15) * 9/5 + 32, comma)
 
     def get_item(self, *args):
@@ -109,7 +130,8 @@ class Weather:
         """
 
         if self.weather_data is None:
-            print('[Error] No weather information collected', file=sys.stderr)
+            print('[Weather: Error in Line: ' + str(get_line_number()) +
+                  '] No weather information collected', file=sys.stderr)
             return None
         if args[0] == 'temperature':
             if len(args) == 3:
@@ -120,11 +142,13 @@ class Weather:
                 elif args[2] == 'fahrenheit':
                     return self.calc_kelvin_2_fahrenheit(self._get_dict(args[0])[args[1]])
                 else:
-                    print('[Error] temperature scale [args[2]] had to be kelvin, celsius or fahrenheit',
+                    print('[Weather: Error in Line: ' + str(get_line_number()) +
+                          '] temperature scale [args[2]] had to be kelvin, celsius or fahrenheit',
                           file=sys.stderr)
                     return None
             else:
-                print('[Error], param temperature had to contain three arguments to unpack '
+                print('[Weather: Error in Line: ' + str(get_line_number()) +
+                      '], param temperature had to contain three arguments to unpack '
                       'like: ("temperature", "temp_max", "celsius")', file=sys.stderr)
                 return None
         elif len(args) == 2:
@@ -132,7 +156,8 @@ class Weather:
         elif len(args) == 1:
             return self._get_dict(args[0])
         else:
-            print('[Error] bad arguments: ' + str(args), file=sys.stderr)
+            print('[Weather: Error in Line: ' + str(get_line_number()) + '] bad arguments: ' +
+                  str(args), file=sys.stderr)
 
     def _get_dict(self, item='temperature'):
         """
@@ -145,7 +170,8 @@ class Weather:
         try:
             return self.weather_data[item]
         except KeyError:
-            print('[Key Error] bad argument: ' + str(item), file=sys.stderr)
+            print('[ Weather: Key Error in Line: ' + str(get_line_number()) + '] bad argument: ' + str(item),
+                  file=sys.stderr)
             sys.exit(-1)
 
 
