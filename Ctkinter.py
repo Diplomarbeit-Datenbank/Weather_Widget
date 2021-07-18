@@ -13,7 +13,10 @@
 
 
 """
+
 from PIL import Image as _Image, ImageTk
+from inspect import currentframe
+from termcolor import colored
 import tkinter as tk
 import _tkinter
 import numpy as np
@@ -22,21 +25,34 @@ import imageio
 import time
 import math
 import cv2
-import sys
 
 __author__ = 'Christof Haidegger'
 __date__ = '27.06.2021'
-__completed__ = '12.07.2021'
+__completed__ = '16.07.2021'
 __work_time__ = 'about 15 Hours'
-__version__ = '1.6'
+__version__ = 'BETA VERSION 1.8 -> There may be some unknown issues left -> BETA VERSION 1.6 -> first stable version'
 __licence__ = 'opensource(common licenced)'
 
 
 def get_right_master(master):
+    """
+
+    :param master: master value in function
+    :return: if master is a Ctkinter object or a tkinter object
+    """
     try:
         return master['CObject']
     except _tkinter.TclError:
         return master
+
+
+def get_line_number():
+    """
+
+    :return: the current line number
+    """
+    cf = currentframe()
+    return cf.f_back.f_lineno
 
 
 class Round_corners:
@@ -46,6 +62,7 @@ class Round_corners:
             -> it is normally not useful for the user -> this class is only used inside this file
 
     """
+
     def __init__(self):
         self.canvas = None
         self.image = None
@@ -141,6 +158,7 @@ class CButton:
                 6. pressing_color   -> this color rise up when the button is pressed
 
     """
+
     def __init__(self, master, bg='black', highlight_color=None, pressing_color='white', width=40, height=10,
                  text=None, font=('Sans', 12), fg='black', courser="hand2", outline=('', 1), rounded_corners='angular',
                  image=None, command=None):
@@ -202,7 +220,7 @@ class CButton:
         """
 
         :param kwargs: kwargs for a normal tkinter button
-        :return: configer the button with the kwargs arguments
+        :return: configure the button with the kwargs arguments
         """
         if list(kwargs.keys())[0] == 'command':
             self._set_command(list(kwargs.values())[0])
@@ -343,6 +361,9 @@ class CCanvas:
                         -> it return the tkinter Canvas itself
 
     """
+    # to count the warnings
+    warning_counter = 0
+
     def __init__(self, master, bg='gray', size=(300, 300), corners='rounded', max_rad=None, outline=('', 0)):
         """
 
@@ -354,13 +375,15 @@ class CCanvas:
         """
 
         self._tk_image = None
-        self._tk_image_list = list()
-        self._canvas_image_list = list()
+        self._tk_image_list, self._canvas_image_list = list(), list()
         self.image_counter = 0
         self.gif = None
         self.focus = False
         self.bg = bg
         self.corners = corners
+        self.size = size
+        self.outline_color = outline
+        self.max_rad = max_rad
 
         right_master = get_right_master(master)
 
@@ -380,20 +403,46 @@ class CCanvas:
         """
         return self.params[item]
 
+    def after(self, *args, **kwargs):
+        self.Canvas.after(*args, **kwargs)
+
     def config(self, **kwargs):
         """
-            THIS FUNCTION IS NOT GREAT AT ALL! It does not work well!
+            THIS FUNCTION IS NOT GREAT AT ALL! It does not work well because by changing the background the other items
+            will be behind the background
         :param kwargs:
         :return:
         """
         if list(kwargs.keys())[0] == 'size':
-            if self.corners == 'angular':
-                self.Canvas.config(width=int(kwargs.get('size')[0]), height=int(kwargs.get('size')[1]))
-                self.Canvas.config(bg=self.bg)
-                self.Canvas.delete(self.outline)
+            print(colored('[Ctkinter: Warning: ' + str(type(self).warning_counter) + ' in Line: ' +
+                  str(get_line_number()) + ']' ' by changing the size, the '
+                                           'background color must be renewed', 'yellow'))
+            type(self).warning_counter += 1
+            self.size = (kwargs.get('size')[0], kwargs.get('size')[1])
+            self.Canvas.config(width=int(kwargs.get('size')[0]), height=int(kwargs.get('size')[1]))
+            self.Canvas.delete(self.outline)
+            self._change_background(self.bg)
 
-            else:
-                print('[Error] Could not resize canvas with rounded corners', file=sys.stderr)
+        if list(kwargs.keys())[0] == 'bg':
+            self._change_background(kwargs.get('bg'))
+
+    def _change_background(self, new_bg):
+        """
+
+        :param new_bg: new background
+        :return: change the background of the canvas
+        """
+        print(colored('[Ctkinter: Warning: ' + str(type(self).warning_counter) + ' in Line: ' +
+              str(get_line_number()) + '] All objects on canvas are deleted with changing the background', 'yellow'))
+
+        type(self).warning_counter += 1
+        round_corn = Round_corners()
+        self.Canvas.delete('all')
+        round_corn.canvas = self.Canvas
+        self.outline = round_corn.rounded_corners_canvas(new_bg, self.size[0], self.size[1],
+                                                         self.corners, self.outline_color, max_rad=self.max_rad)
+        self.Canvas = round_corn.return_canvas()
+        self.params = {"background": new_bg, "CObject": self.Canvas}
 
     def update(self):
         """
@@ -496,7 +545,14 @@ class CCanvas:
         if ret is True:
             if self.image_counter != 0:
                 if len(self._canvas_image_list) > 1:
-                    self.Canvas.delete(self._canvas_image_list[len(self._canvas_image_list) - 2])
+                    try:
+                        self.Canvas.delete(self._canvas_image_list[len(self._canvas_image_list) - 2])
+                    except _tkinter.TclError:
+                        print(colored('[Ctkinter: Warning: ' + str(type(self).warning_counter) + ' in Line: ' +
+                              str(get_line_number()) + '] image to destroy wos not found raise execution', 'yellow'))
+
+                        type(self).warning_counter += 1
+
             frame = cv2.resize(frame, size)
             self.create_image(corner, self.bg, size[0], size[1], pos, frame, transparent=transparent,
                               read_from_path=False)
@@ -517,7 +573,14 @@ class CCanvas:
         :                  -> start run the animation
         """
         while self.focus is True:
-            self._run_animation(gif_len, transparent, corner, size, pos, large)
+            try:
+                self._run_animation(gif_len, transparent, corner, size, pos, large)
+            except _tkinter.TclError:
+                print(colored('[Ctkinter: Warning: ' + str(type(self).warning_counter) + ' in Line: ' +
+                      str(get_line_number()) +
+                              '] Gif image could not be created -> destroy the actually gif', 'yellow'))
+                type(self).warning_counter += 1
+                break
             time.sleep(0.04)
 
     def _focus_false(self):
@@ -652,8 +715,10 @@ class CLabel:
             2. corner:    -> to create rounded corners of the label three functions are available
             3. outline:   -> this is to draw the outline of the label
     """
-    def __init__(self, master, bg='black', size=(100, 20), text=None, fg='black', font=('Sans', 12),
-                 corner='rounded', max_rad=None, outline=('', 0), anchor='NW'):
+
+    def __init__(self, master, bg='white', size=(100, 20), text=None, fg='black', font=('Sans', 12),
+                 corner='rounded', max_rad=None, outline=('', 0), anchor='NW', variable_text=False,
+                 enter_hit=(False, None)):
         """
 
         :param master:         master, where the Label should be placed
@@ -669,6 +734,7 @@ class CLabel:
 
         self.text = text
         self.font = font
+        self.variable_text_widget = None
         change_size = False
 
         if size[0] is None:
@@ -678,26 +744,71 @@ class CLabel:
         self.CLabel = CCanvas(master, bg, size, corner, max_rad=max_rad, outline=outline)
 
         if change_size is True:
-            if corner == 'angular':
-                # size + 10 because the text is not exactly on the left border of the label
-                size = (int(self.get_text_len_in_px() + 10), size[1])
-                self.CLabel.config(size=size)
-            else:
-                print('[Error] Items with rounded or round corners could not be resized -> size[0] != None!\n'
-                      'size[0] is set to default value (100px)', file=sys.stderr)
-                size = (100, size[1])
+            size = (int(self.get_text_len_in_px() + 10), size[1])
+            self.CLabel.config(size=size)
 
         if text is not None:
-            if anchor == 'NW':
-                self.CLabel.create_text(10, 10, text=text, anchor=tk.NW, font=font, fill=fg)
+            if variable_text is False:
+                if anchor == 'NW':
+                    self.CLabel.create_text(10, 10, text=text, anchor=tk.NW, font=font, fill=fg)
 
+                else:
+                    self.CLabel.create_text(int(size[0] / 2), int(size[1] / 2), text=text, anchor=tk.CENTER, font=font,
+                                            fill=fg)
             else:
-                self.CLabel.create_text(int(size[0] / 2), int(size[1] / 2), text=text, anchor=tk.CENTER, font=font,
-                                        fill=fg)
+                self._create_variable_text(fg, size, bg, text, enter_hit)
+
+    def _create_variable_text(self, fg, size, bg, text, set_enter_hit=(False, None)):
+        """
+
+        :param size:          size of the variable text
+        :param bg:            background of the variable text
+        :param text:          text in the variable text widget
+        :param set_enter_hit: if a event raises when enter (return) is hit
+        :return:              create the changeable text widget on the label
+        """
+        self.variable_text_widget = tk.Entry(self.CLabel.get_canvas(), width=int((size[0] / 10) - 14), font=self.font,
+                                             bg=bg, insertbackground='black', bd=0, fg=fg)
+
+        self.variable_text_widget.insert(tk.END, text)
+        self.variable_text_widget.place(x=10, y=12)
+
+        if set_enter_hit[0] is not False:
+            self.variable_text_widget.bind('<Return>',
+                                           lambda a: self._run_enter_hit_function(set_enter_hit[1],
+                                                                                  self.variable_text_widget))
+
+    def _run_enter_hit_function(self, func, variable_text):
+        """
+
+        :param func:          run the function when enter is hit
+        :param variable_text: the variable text widget itself
+        :return:              run the function
+        """
+        self.CLabel.get_canvas().focus_set()
+        func(variable_text)
+
+    def get_canvas(self):
+        """
+
+        :return: the tkinter Canvas of the CLabel
+        """
+        return self.CLabel.get_canvas()
+
+    def config(self, **kwargs):
+        """
+
+        :param kwargs: bg is the only available until now
+        :return:
+        """
+        if list(kwargs.keys())[0] == 'bg':
+            self.CLabel.config(bg=kwargs.get('bg'))
+            if self.variable_text_widget is not None:
+                self.variable_text_widget.config(bg=kwargs.get('bg'))
 
     def get_text_len_in_px(self):
         """
-            Atention! This function is not really great but it works!
+            Attention! This function is not really great but it works!
 
         :return: the len of the text in px
         """
@@ -726,3 +837,10 @@ class CLabel:
         :                   -> the CLabel will be packed
         """
         self.CLabel.pack(*args, **kwargs)
+
+    def destroy(self):
+        """
+
+        :return: destroy the CLabel and the background tkinter Canvas
+        """
+        self.CLabel.destroy()
