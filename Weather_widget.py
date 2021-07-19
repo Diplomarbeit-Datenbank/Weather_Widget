@@ -18,12 +18,10 @@
 
 """
 
-
 from lib import languages
 from lib import weather
 import Ctkinter as Ctk
 import tkinter as tk
-
 
 __date__ = '8.07.2021'
 __completed__ = '16.07.2021'
@@ -70,6 +68,7 @@ class Weather_widget:
     """
         To create the weather widget call the Class Weather Widget
     """
+
     def __init__(self, master, destination='Innsbruck', language='english', scale=('celsius', 'km/h')):
         """
 
@@ -78,7 +77,9 @@ class Weather_widget:
         :param language:      -> language on the weather widget
         :param scale:         -> is a tuple example: ('celsius', 'km/h') first is for the temp and second for the wind
         """
+        self.offline_label = None
         self.destination = destination
+        self.offline = False
         self.scale = scale
         self.change_to_language = languages.Language(file_path='languages/languages.txt', language=language)
         self.master = master
@@ -87,8 +88,10 @@ class Weather_widget:
         # status, temp, wind, humidity, cloud_index = 'sun nice', [25, 30, 23, 26], 4.1, 5, 50
 
         if status == 'DataCollectingError':
-            print('Destination not found')
-            return
+            print('Destination not found or no Internet connection')
+            status, temp, wind, humidity, cloud_index, destination = self._get_last_information()
+            print(status, temp, wind, humidity, cloud_index, destination)
+            self.destination = destination
 
         gif_path, bg, header_bg = get_right_gif_path(status)
 
@@ -100,6 +103,22 @@ class Weather_widget:
         self.logo = self._create_header_logo(bg=bg, size=(105, 35), place=(450, 2))
 
         self._create_gif_icon_temp_labels_info_labels(bg, gif_path, temp, status, wind, humidity, cloud_index)
+        self._save_old_data(status, temp[0], temp[1], temp[2], temp[3], wind, humidity, cloud_index)
+
+    def _get_last_information(self):
+        """
+        
+        :return: the last saved information when the Game Frame or the PC is offline
+        """
+        self.offline = True
+        last_weather_data = open('data_files/last_weather_data.txt', 'r')
+        last_weather_data_r = last_weather_data.read().split('\n')
+        last_weather_data.close()
+
+        return last_weather_data_r[0], [float(last_weather_data_r[1]), float(last_weather_data_r[2]),
+                                        float(last_weather_data_r[3]), float(last_weather_data_r[4])], \
+               float(last_weather_data_r[5]), float(last_weather_data_r[6]), float(last_weather_data_r[7]), \
+               last_weather_data_r[8]
 
     def _get_actually_weather(self, scale):
         """
@@ -145,6 +164,10 @@ class Weather_widget:
         return weather_widget_title
 
     def show_destination_error(self):
+        """
+
+        : shows the destination error on the weather widget
+        """
         self.destination_lab.destroy()
         self.destination_lab = self._create_destination_label(bg=self.weather_widget['background'],
                                                               size=(355, 60), place=(240, 60))
@@ -166,24 +189,41 @@ class Weather_widget:
             self.weather_widget.after(1000, self.show_destination_error)
             return
 
-        self.gif_icon.destroy()
-        self.temp_labels.destroy()
-        self.info_labels.destroy()
-        self.logo.destroy()
+        self.offline = False
+        self.gif_icon.destroy(), self.temp_labels.destroy(), self.info_labels.destroy(), self.logo.destroy()
         self.header_text.destroy()
 
         gif_path, bg, header_bg = get_right_gif_path(status)
         self.logo = self._create_header_logo(bg=bg, size=(105, 35), place=(450, 2))
         self.header_text = self._create_header_text(bg=header_bg, size=(300, 40), place=(28, 5))
-        self.logo.get_canvas().config(bg=bg)
 
-        self.weather_widget.config(bg=bg)
+        background_config_list = [self.logo.get_canvas(), self.weather_widget, self.destination_lab,
+                                  self.destination_lab.get_canvas(), self.header_text.get_canvas()]
+        for to_config in background_config_list:
+            to_config.config(bg=bg)
 
-        self.destination_lab.config(bg=bg)
-        self.destination_lab.get_canvas().config(bg=bg)
-
-        self.header_text.get_canvas().config(bg=bg)
+        self._save_old_data(status, temp[0], temp[1], temp[2], temp[3], wind, humidity, cloud_index)
         self._create_gif_icon_temp_labels_info_labels(bg, gif_path, temp, status, wind, humidity, cloud_index)
+
+    def _save_old_data(self, status, actually_temp, max_temp, min_temp, fells_like, wind, humidity, cloud_index):
+        """
+        
+        :param status:        actually status
+        :param actually_temp: actually temperature
+        :param max_temp:      actually max temperature
+        :param min_temp:      actually min temperature
+        :param fells_like:    actually feels like temperature
+        :param wind:          actually wind speed
+        :param humidity:      actually humidity in percent
+        :param cloud_index:   actually clouds in percent
+        :return:              write the actually values in a text file to save them
+        """
+        data = open('data_files/last_weather_data.txt', 'w')
+        to_write = [status, actually_temp, max_temp, min_temp, fells_like, wind, humidity, cloud_index,
+                    self.destination]
+        for item in to_write:
+            data.write(str(item) + '\n')
+        data.close()
 
     def _create_gif_icon_temp_labels_info_labels(self, bg, gif_path, temp, status, wind, humidity, cloud_index):
         """
@@ -282,6 +322,15 @@ class Weather_widget:
                                     font=('Sans', 10), corner='angular', max_rad=None, outline=('', 0), anchor='NW')
             info_label.place(x=x_po, y=1)
             x_po += int(info_label.get_text_len_in_px() + 5)
+
+        if self.offline is True:
+            self.offline_label = Ctk.CLabel(self.weather_widget, bg='red', size=(None, 30), text='Offline',
+                                            fg='white', font=('Sans', 20), corner='round', max_rad=None,
+                                            outline=('', 0), anchor='CENTRE')
+            self.offline_label.place(x=340, y=8)
+        else:
+            if self.offline_label is not None:
+                self.offline_label.destroy()
 
         return background_canvas
 
