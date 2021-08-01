@@ -30,6 +30,10 @@
       Destination übergeben werden.
     o Als beispiel können Sie einfach die main Funktion starten, welche eine mögliche implementierung des 
       Wetter Widget simuliert.
+      
+ ## Ändern des Standortes:
+     o Einfach auf den momentanen Standort klicken, den neuen Standort eingeben, auf Enter drücken und fertig,
+       der neue Standort wird automatisch geladen
     
     
     
