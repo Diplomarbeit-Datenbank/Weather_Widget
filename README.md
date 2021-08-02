@@ -1,4 +1,6 @@
 # Wetter Widget
+![image](https://user-images.githubusercontent.com/87471423/127841882-c092371c-2cf3-457a-8507-27aa92ff5c9f.png)
+
 
 ## Aussehen:
 ![image](https://user-images.githubusercontent.com/87471423/127818832-e156c1f5-01a8-495d-810a-22c33f10fb1f.png)
