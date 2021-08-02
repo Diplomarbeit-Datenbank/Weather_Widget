@@ -26,7 +26,7 @@ Ein Widget zum Anzeigen der aktuellen Wetterdaten eines vom Benutzer eigebebenen
     o weather   -> gespeichert unter: lib/weather.py          
                 -> Beschreibung unter folgendem Link: https://github.com/Diplomarbeit-Datenbank/Weather_lib
     o Ctkinter  -> gespeichert unter Python39/Lib/Ctkinter.py 
-                -> Beschreibung unter folgendem Link:
+                -> Beschreibung unter folgendem Link:https://github.com/Diplomarbeit-Datenbank/Ctkinter
     o tkinter   -> Unter Windows bereits vorinstalliert
                 -> Unter Linux benutze: sudo apt-get install tkinter
  
