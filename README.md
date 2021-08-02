@@ -1,6 +1,9 @@
 # Wetter Widget
-![image](https://user-images.githubusercontent.com/87471423/127841882-c092371c-2cf3-457a-8507-27aa92ff5c9f.png)
+![image](https://user-images.githubusercontent.com/87471423/127841992-52a5a536-b0ba-4b02-88b9-dd3d3f5b437d.png)
 
+Bildquelle: https://www.90s90s.de/das-sonnenbaby-der-teletubbies
+
+Ein Widget zum Anzeigen der aktuellen Wetterdaten eines vom Benutzer eigebebenen Standortes
 
 ## Aussehen:
 ![image](https://user-images.githubusercontent.com/87471423/127818832-e156c1f5-01a8-495d-810a-22c33f10fb1f.png)
