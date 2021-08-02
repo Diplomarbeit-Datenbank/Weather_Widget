@@ -19,7 +19,7 @@
     o languages -> gespeichert unter: lib/languages.py        
                 -> Beschreibung unter folgendem Link: https://github.com/Diplomarbeit-Datenbank/Languages
     o weather   -> gespeichert unter: lib/weather.py          
-                -> Beschreibung unter folgendem Link:
+                -> Beschreibung unter folgendem Link: https://github.com/Diplomarbeit-Datenbank/Weather_lib
     o Ctkinter  -> gespeichert unter Python39/Lib/Ctkinter.py 
                 -> Beschreibung unter folgendem Link:
     o tkinter   -> Unter Windows bereits vorinstalliert
