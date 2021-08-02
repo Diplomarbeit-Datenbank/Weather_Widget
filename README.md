@@ -1,7 +1,9 @@
 # Wetter Widget
 
 ## Aussehen:
-![weather_widget](https://user-images.githubusercontent.com/87471423/125760095-264392d7-0a79-4874-afb4-0715f5bc2f8f.PNG)
+![image](https://user-images.githubusercontent.com/87471423/127818832-e156c1f5-01a8-495d-810a-22c33f10fb1f.png)
+
+
 
 ## Funktionen:
     o Anzeigen der aktuellen Wetterlage
