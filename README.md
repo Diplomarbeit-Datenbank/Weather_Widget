@@ -31,6 +31,8 @@ Ein Widget zum Anzeigen der aktuellen Wetterdaten eines vom Benutzer eingegebene
                 -> Unter Linux benutze: sudo apt-get install tkinter
  
  ## Verwendung:
+ ![image](https://user-images.githubusercontent.com/87471423/129370108-2a2cdb37-11f1-4c05-9678-5af12251dbfe.png)
+
     o Weather_widget in denselben Ordner packen als wie die restlichen zu Verfügung stehenden Download Ordner
     o anschließend die Datei Wetter_widget.py starten
     o Um den Ort für die Vorhersage zu ändern, muss ausschließlich der Klasse Wetter_widget eine andere 
