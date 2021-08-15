@@ -54,4 +54,4 @@ Ein Widget zum Anzeigen der aktuellen Wetterdaten eines vom Benutzer eingegebene
     o Debugging Christof Haidegger
     
     o Geschriebene Zeilen in Python-Code: 393
-    o Geschriebene Zeielen in README-Code: 58
+    o Geschriebene Zeilen in README-Code: 58
