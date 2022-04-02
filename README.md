@@ -15,8 +15,8 @@ Ein Widget zum Anzeigen der aktuellen Wetterdaten eines vom Benutzer eingegebene
     o Anzeigen der aktuellen minimalen und maximalen Temperatur
     o Anzeigen der aktuellen Windgeschwindigkeit
     o Anzeigen der Luftfeuchtigkeit
-    o Anzeigen der prozentuellen Wolken Bedeckung der Himmels
-    o Anzeigen eines zur Wetterlage passendes animiertes Icon
+    o Anzeigen der prozentuellen Wolkenbedeckung des Himmels
+    o Anzeigen eines zur Wetterlage passenden animierten Icons
     o Anzeigen des pixelboy Logos (seal of quality)
 
 
